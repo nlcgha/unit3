@@ -1,0 +1,55 @@
+//Nik Leung
+//Unit 1 checkpoint's
+//Lens Pellitier
+
+//the smaller the # the lighter it is
+
+//vars
+color l1p = #E5D9F2;
+color l2p = #F5EFFF;
+color l3p = #CDC1FF;
+color ol = #A594F9;
+color bg = #F6F0F0;
+color w = #FFFFFF;
+color ind;
+
+void setup() {
+  size(800, 600);
+  strokeWeight(5);
+  stroke(ol);
+}
+
+void draw() {
+  background(bg);
+  //bts
+  if (dist(100, 100, mouseX, mouseY)<50) {
+    stroke(w);
+    fill(l1p);
+    circle(100, 100, 100);
+  }
+  if (dist(100, 300, mouseX, mouseY)<50) {
+      stroke(w);
+    fill(l2p);
+    circle(100, 300, 100);
+  }
+  if (dist(100, 500, mouseX, mouseY)<50) {
+    stroke(w);
+    fill(l3p);
+    circle(100, 500, 100);
+  }
+    //ind
+    fill(ind);
+    square(300, 100, 400);
+  }
+
+  void mouseReleased() {
+    if (dist(100, 100, mouseX, mouseY)<50) {
+      ind=l1p;
+    }
+    if (dist(100, 300, mouseX, mouseY)<50) {
+      ind=l2p;
+    }
+    if (dist(100, 500, mouseX, mouseY)<50) {
+      ind=l3p;
+    }
+  }
