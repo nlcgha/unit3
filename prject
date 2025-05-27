@@ -1,0 +1,92 @@
+//Nik Leung
+//Unit 3 Project
+//Lens Pellitier
+//bools
+boolean isStamping;
+boolean isDrawing;
+PImage knife;
+
+//colors
+color w = color(255);
+color b = color(0);
+color cRect = color(200, 100, 100);
+color cCircle = color(100, 100, 200);
+color bg = color(240);
+color ind = color(180); // Indicator color
+
+//vars
+float strk;
+float shde;
+float sliderX1;
+float sliderX2;
+float strkind;
+
+void setup() {
+  size(600, 400);
+}
+
+void draw() {
+  background(bg);
+
+  drawRectButton(100, 100, 200, 80, cRect);
+  drawCircleButton(450, 140, 40, cCircle);
+
+  // Indicator
+  fill(ind);
+  stroke(0);
+  ellipse(300, 300, 150, 150);
+}
+
+void mouseReleased() {
+//rect click
+  if (mouseX > 100 && mouseX < 300 && mouseY > 100 && mouseY < 180) {
+    ind = cRect;
+  }
+
+//circular click
+  if (dist(mouseX, mouseY, 450, 140) < 40) {
+    ind = cCircle;
+  }
+}
+
+//rect button
+void drawRectButton(int rx, int ry, int w, int h, color fillColor) {
+  if (mouseX > rx && mouseX < rx + w && mouseY > ry && mouseY < ry + h) {
+    stroke(w);
+  } else {
+    stroke(b);
+  }
+  fill(fillColor);
+  rect(rx, ry, w, h);
+}
+
+//circular button
+void drawCircleButton(int cx, int cy, int r, color fillColor) {
+  if (dist(mouseX, mouseY, cx, cy) < r) {
+    stroke(w);
+  } else {
+    stroke(b);
+  }
+  fill(fillColor);
+  ellipse(cx, cy, r * 2, r * 2);
+}
+
+//void stamptool();
+
+//void linetool();
+
+//void sliders();
+//= shade, thickness
+
+//void save();
+
+//void load();
+
+//void new();
+
+//void sfx();
+//=buttontact
+
+//add indicator
+
+//add modes
