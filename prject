@@ -1,18 +1,27 @@
 //Nik Leung
 //Unit 3 Project
 //Lens Pellitier
-//bools
-boolean isStamping;
-boolean isDrawing;
+
+//ints
+int mode;
+final int stamping = -1;
+final int drawing = 1;
+
+//pimage
 PImage knife;
 
 //colors
 color w = color(255);
-color b = color(0);
-color cRect = color(200, 100, 100);
-color cCircle = color(100, 100, 200);
+color black = color(0);
 color bg = color(240);
-color ind = color(180); // Indicator color
+color ind = color(180);
+color r = color(255, 0, 0);
+color g = color(0, 255, 0);
+color b = color(0, 0, 255);
+color o = color(255, 128, 0);
+color a = color(0, 255, 255);
+color purp = color(127, 0, 255);
+color p = color(255, 0, 255);
 
 //vars
 float strk;
@@ -22,71 +31,131 @@ float sliderX2;
 float strkind;
 
 void setup() {
-  size(600, 400);
+  size(800, 800);
+  mode = drawing;
 }
 
 void draw() {
   background(bg);
+  //if (mode==stamping){
+  //stamping();
+  //} else if (mode==drawing) {
+  //drawing();
+  //}else println("smash that bug!");
 
-  drawRectButton(100, 100, 200, 80, cRect);
-  drawCircleButton(450, 140, 40, cCircle);
+  //  drawRectButton(100, 100, 200, 80, color);
+  //  drawCircleButton(450, 140, 40, color);
+  stroke(0);
+  line(150, 0, 150, 800);
+  line(0, 150, 150, 150);
 
-  // Indicator
+  //slider
+  strokeWeight(5);
+  sliderY = 300;
+  shade = 0;
+  slider(400, 50, 500);
+
+  //indicator
   fill(ind);
   stroke(0);
-  ellipse(300, 300, 150, 150);
+  ellipse(75, 75, 120, 120);
+
+  //if (isStamping==true && isDrawing==false) {
+  //stamp();
+  // }
+  //if (isStamping==false&& isDrawing==true) {
+  //sqline();
+  // }
 }
 
-void mouseReleased() {
-//rect click
-  if (mouseX > 100 && mouseX < 300 && mouseY > 100 && mouseY < 180) {
-    ind = cRect;
+  void mouseReleased() {
+    //rect click
+    if (mouseX > 100 && mouseX < 300 && mouseY > 100 && mouseY < 180) {
+      ind = r;
+    }
+
+    //circular click
+    if (dist(mouseX, mouseY, 450, 140) < 40) {
+      ind = r;
+    }
   }
 
-//circular click
-  if (dist(mouseX, mouseY, 450, 140) < 40) {
-    ind = cCircle;
+  //rect button
+  void drawRectButton(int rx, int ry, int w, int h, color fillColor) {
+    if (mouseX > rx && mouseX < rx + w && mouseY > ry && mouseY < ry + h) {
+      stroke(w);
+    } else {
+      stroke(b);
+    }
+    fill(fillColor);
+    rect(rx, ry, w, h);
   }
-}
 
-//rect button
-void drawRectButton(int rx, int ry, int w, int h, color fillColor) {
-  if (mouseX > rx && mouseX < rx + w && mouseY > ry && mouseY < ry + h) {
-    stroke(w);
-  } else {
-    stroke(b);
+  //circular button
+  void drawCircleButton(int cx, int cy, int r, color fillColor) {
+    if (dist(mouseX, mouseY, cx, cy) < r) {
+      stroke(w);
+    } else {
+      stroke(b);
+    }
+    fill(fillColor);
+    ellipse(cx, cy, r * 2, r * 2);
+    
+    //slider
+    controlSlider();
   }
-  fill(fillColor);
-  rect(rx, ry, w, h);
-}
 
-//circular button
-void drawCircleButton(int cx, int cy, int r, color fillColor) {
-  if (dist(mouseX, mouseY, cx, cy) < r) {
-    stroke(w);
-  } else {
-    stroke(b);
+  float shade;
+  float sliderY;
+
+  color c1 = color(0);
+  color c2 = color(255);
+
+
+  void mouseDragged() {
+    controlSlider();
   }
-  fill(fillColor);
-  ellipse(cx, cy, r * 2, r * 2);
-}
+  
+  void slider(float x, float ytop, float length) {
+    float ybot = ytop + length;
 
-//void stamptool();
+    stroke(c1);
+    line(x, ytop, x, ybot);
 
-//void linetool();
+    if (mouseX > x - 25 && mouseX < x + 25 && mouseY > sliderY - 25 && mouseY < sliderY + 25) {
+      stroke(w);
+    } else {
+      stroke(b);
+    }
 
-//void sliders();
-//= shade, thickness
+    fill(c2);
+    circle(x, sliderY, 50);
+  }
 
-//void save();
+  void controlSlider() {
+    if (mouseX > 375 && mouseX < 425 && mouseY > 50 && mouseY < 550) {
+      sliderY = constrain(mouseY, 50, 550);
+    }
 
-//void load();
+    shade = map(sliderY, 50, 550, 0, 255);
+  }
 
-//void new();
 
-//void sfx();
-//=buttontact
+  //void stamptool();
 
-//add indicator
+  //void linetool();
 
-//add modes
+  //void sliders();
+  //= shade, thickness
+
+  //void save();
+  //void load();
+
+  //void new();
+
+  //void sfx();
+  //=buttontact
+
+  //add indicator
+
+  //add modes
