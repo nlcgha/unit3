@@ -1,7 +1,10 @@
 //Nik Leung
 //Unit 3 Project
 //Lens Pellitier
+import ddf.minim.*;
 
+Minim minim;
+AudioSample clicksound;
 //ints
 int mode;
 final int stamping = -1;
@@ -11,17 +14,17 @@ final int drawing = 1;
 PImage knife;
 
 //colors
-color w = color(255);
+color wt = color(255);
 color black = color(0);
-color bg = color(240);
+color background = color(240);
 color ind = color(180);
-color r = color(255, 0, 0);
-color g = color(0, 255, 0);
-color b = color(0, 0, 255);
-color o = color(255, 128, 0);
-color a = color(0, 255, 255);
-color purp = color(127, 0, 255);
-color p = color(255, 0, 255);
+color red = color(255, 0, 0);
+color green = color(0, 255, 0);
+color blue = color(0, 0, 255);
+color orange = color(255, 128, 0);
+color aqua = color(0, 255, 255);
+color purple = color(127, 0, 255);
+color pink = color(255, 0, 255);
 
 //vars
 float strk;
@@ -32,130 +35,112 @@ float strkind;
 
 void setup() {
   size(800, 800);
+  sliderY = 300;
+  shade = 0;
   mode = drawing;
+  minim = new Minim(this);
+  clicksound=minim.loadSample("clicksound.mp3",512);
 }
 
 void draw() {
-  background(bg);
-  //if (mode==stamping){
-  //stamping();
-  //} else if (mode==drawing) {
-  //drawing();
-  //}else println("smash that bug!");
+  background(background);
+  if (mode==stamping) {
+    stamping();
+  } else if (mode==drawing) {
+    drawing();
+  } else println("smash that bug!");
 
-  //  drawRectButton(100, 100, 200, 80, color);
-  //  drawCircleButton(450, 140, 40, color);
+  drawRectButton(100, 100, 200, 80, red);
+  drawCircleButton(450, 140, 40, blue);
   stroke(0);
   line(150, 0, 150, 800);
   line(0, 150, 150, 150);
 
   //slider
   strokeWeight(5);
-  sliderY = 300;
-  shade = 0;
-  slider(400, 50, 500);
+  drawslider(400, 50, 500);
 
   //indicator
   fill(ind);
   stroke(0);
   ellipse(75, 75, 120, 120);
-
-  //if (isStamping==true && isDrawing==false) {
-  //stamp();
-  // }
-  //if (isStamping==false&& isDrawing==true) {
-  //sqline();
-  // }
 }
 
-  void mouseReleased() {
-    //rect click
-    if (mouseX > 100 && mouseX < 300 && mouseY > 100 && mouseY < 180) {
-      ind = r;
-    }
+void mouseReleased() {
+  //rect click
+  if (mouseX > 100 && mouseX < 300 && mouseY > 100 && mouseY < 180) {
+    ind = red;
+    clicksound.trigger();
+  }
+  //circular click
+  if (dist(mouseX, mouseY, 450, 140) < 40) {
+    ind = blue;
+    clicksound.trigger();
+  }
+}
 
-    //circular click
-    if (dist(mouseX, mouseY, 450, 140) < 40) {
-      ind = r;
-    }
+//rect button
+void drawRectButton(int rx, int ry, int w, int h, color fillColor) {
+  if (mouseX > rx && mouseX < rx + w && mouseY > ry && mouseY < ry + h) {
+    stroke(wt);
+  } else {
+    stroke(black);
+  }
+  fill(fillColor);
+  rect(rx, ry, w, h);
+}
+
+//circular button
+void drawCircleButton(int cx, int cy, int r, color fillColor) {
+  if (dist(mouseX, mouseY, cx, cy) < r) {
+    stroke(wt);
+  } else {
+    stroke(black);
+  }
+  fill(fillColor);
+  ellipse(cx, cy, r * 2, r * 2);
+}
+
+void drawslider(float x, float ytop, float length) {
+  float ybot = ytop + length;
+
+  stroke(wt);
+  line(x, ytop, x, ybot);
+
+  if (dist(mouseX,mouseY,x,sliderY)<25) {
+    stroke(wt);
+  } else {
+    stroke(black);
   }
 
-  //rect button
-  void drawRectButton(int rx, int ry, int w, int h, color fillColor) {
-    if (mouseX > rx && mouseX < rx + w && mouseY > ry && mouseY < ry + h) {
-      stroke(w);
-    } else {
-      stroke(b);
-    }
-    fill(fillColor);
-    rect(rx, ry, w, h);
+  fill(black);
+  circle(x, sliderY, 50);
+}
+
+void controlSlider() {
+  if (mouseX > 375 && mouseX < 425 && mouseY > 50 && mouseY < 550) {
+    sliderY = mouseY;
   }
 
-  //circular button
-  void drawCircleButton(int cx, int cy, int r, color fillColor) {
-    if (dist(mouseX, mouseY, cx, cy) < r) {
-      stroke(w);
-    } else {
-      stroke(b);
-    }
-    fill(fillColor);
-    ellipse(cx, cy, r * 2, r * 2);
-    
-    //slider
-    controlSlider();
-  }
+  shade = map(sliderY, 50, 550, 0, 255);
+}
 
-  float shade;
-  float sliderY;
+float shade;
+float sliderY;
 
-  color c1 = color(0);
-  color c2 = color(255);
+void mouseDragged() {
+  controlSlider();
+}
 
+//= shade, thickness
 
-  void mouseDragged() {
-    controlSlider();
-  }
-  
-  void slider(float x, float ytop, float length) {
-    float ybot = ytop + length;
+//void save();
+//void load();
 
-    stroke(c1);
-    line(x, ytop, x, ybot);
+//void new();
 
-    if (mouseX > x - 25 && mouseX < x + 25 && mouseY > sliderY - 25 && mouseY < sliderY + 25) {
-      stroke(w);
-    } else {
-      stroke(b);
-    }
+//=buttontact
 
-    fill(c2);
-    circle(x, sliderY, 50);
-  }
+//add indicator
 
-  void controlSlider() {
-    if (mouseX > 375 && mouseX < 425 && mouseY > 50 && mouseY < 550) {
-      sliderY = constrain(mouseY, 50, 550);
-    }
-
-    shade = map(sliderY, 50, 550, 0, 255);
-  }
-
-
-  //void stamptool();
-
-  //void linetool();
-
-  //void sliders();
-  //= shade, thickness
-
-  //void save();
-  //void load();
-
-  //void new();
-
-  //void sfx();
-  //=buttontact
-
-  //add indicator
-
-  //add modes
+//add modes
