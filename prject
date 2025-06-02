@@ -1,163 +1,197 @@
 import ddf.minim.*;
 
 Minim minim;
-AudioSample clicksound;
-//ints
+AudioPlayer clicksound;
+
+// drawing mode variables
 int mode;
 final int stamping = -1;
 final int drawing = 1;
 
-boolean draggingSlider = false;
+// slider‐dragging flags
+boolean draggingStroke = false;
+boolean draggingShade  = false;
 
-//pimage
-PImage knife;
+// “indicator” circle shows the current drawing color
+color ind;
 
-//colors
+// predefined colors for the circle buttons
+color blueColor  = color(0, 0, 255);
+color redColor   = color(255, 0, 0);
+
+// background/toolbar colors
+color backgroundColor = color(240);
 color wt = color(255);
-color black = color(0);
-color background = color(240);
-color ind = color(180);
-color red = color(255, 0, 0);
-color green = color(0, 255, 0);
-color blue = color(0, 0, 255);
-color orange = color(255, 128, 0);
-color aqua = color(0, 255, 255);
-color purple = color(127, 0, 255);
-color pink = color(255, 0, 255);
+color bk = color(0);
 
-//vars
-float strk;
-float shde;
-float sliderX1;
-float sliderX2;
-float strkind;
+// Slider positions and ranges
+float sliderStrokeX = 100;  // x‐position of “stroke weight” slider
+float sliderShadeX  = 40;   // x‐position of “shade” slider
+float sliderY       = 300;  // knob y for shade slider (maps to shade 0–255)
+float sliderY1      = 300;  // knob y for stroke‐weight slider (maps to 1–20)
+float shade         = 0;    // current shade (0 = black, 255 = white)
+float strk          = 1;    // current stroke weight (starts at 1)
 
-float shade = 0;
-float sliderY = 300;
+// Keep stamping() empty for now
+void stamping() {
+  // …no stamping behavior yet…
+}
 
 void setup() {
   size(800, 800);
-  background(background);
+  background(backgroundColor);
   mode = drawing;
+  
+  // load Minim + click‐sound
   minim = new Minim(this);
-  clicksound = minim.loadSample("clicksound.mp3", 512);
+  clicksound = minim.loadFile("clicksound.mp3", 512);
+  
+  // initialize indicator to mid‐gray
+  ind = color(180);
 }
 
 void draw() {
-  if (mode == stamping) {
-    stamping();
-  } else if (mode == drawing) {
-    drawing();
-  } else println("smash that bug!");
-
-  //toolbar outline
+  // 1) FIRST: if we’re in DRAWING mode, allow freehand lines (persistent)
+  if (mode == drawing) {
+    drawingMode();
+  }
+  
+  // 2) THEN: paint the toolbar on top (never clears the canvas)
+  drawToolbar();
+  
+  // 3) DRAW the indicator circle in corner (shows current color)
   noStroke();
-  fill(background);
-  rect(0, 0, 150, 800);
-  stroke(1);
-  stroke(0);
-  line(150, 0, 150, 800);
-  line(0, 150, 150, 150);
-
-  //color buttons, background button
-  drawCircleButton(40, 200, 50, blue);
-  drawCircleButton(110, 200, 50, red);
-
-  //sliders for strk and shde
-  strokeWeight(2);
-  drawslider(40, 300, 300);
-
-  //Save, load, new buttons
-
-  //stamp button
-
-  //indicator
   fill(ind);
-  stroke(strk);
   ellipse(75, 75, 120, 120);
 }
 
-//rect button
-void drawRectButton(int rx, int ry, int w, int h, color fillColor) {
-  if (mouseX > rx && mouseX < rx + w && mouseY > ry && mouseY < ry + h) {
-    stroke(240);
-    ind = fillColor;
-    clicksound.trigger();
-  } else {
-    stroke(black);
-  }
-  fill(fillColor);
-  rect(rx, ry, w, h);
-}
-
-//circular button
-void drawCircleButton(int cx, int cy, int r, color fillColor) {
-  if (dist(mouseX, mouseY, cx, cy) < r && mousePressed) {
-    stroke(240);
-    ind = fillColor;
-    clicksound.trigger();
-  } else {
-    stroke(black);
-  }
-  fill(fillColor);
-  ellipse(cx, cy, r, r);
-}
-
-void drawslider(float x, float ytop, float length) {
-  float ybot = ytop + length;
-
-  stroke(180);
-  line(x, ytop, x, ybot);
-
-  if (dist(mouseX, mouseY, x, sliderY) < 25) {
-    stroke(wt);
-  } else {
-    stroke(black);
-  }
-
-  fill(black);
-  circle(x, sliderY, 25);
-}
-
-void controlSlider() {
-  if (draggingSlider) {
-    sliderY = constrain(mouseY, 300, 600);
-    shade = map(sliderY, 300, 600, 0, 255);
-    shde = shade;
-  }
-}
-
-void mousePressed() {
-  if (dist(mouseX, mouseY, 40, sliderY) < 25) {
-    draggingSlider = true;
-    clicksound.trigger();
-    return;
-  }
-
-  if (dist(mouseX, mouseY, 40, 200) < 50) {
-    ind = blue;
-    clicksound.trigger();
-  } else if (dist(mouseX, mouseY, 110, 200) < 50) {
-    ind = red;
-    clicksound.trigger();
-  }
-}
-
-void mouseReleased() {
-  draggingSlider = false;
-}
-
-void mouseDragged() {
-  controlSlider();
-}
-
-void drawing() {
-  if (mousePressed && mouseX > 150) {
+// ----------------------------------------------------
+// DRAWING MODE: freehand lines whenever mouse is pressed
+void drawingMode() {
+  if (mousePressed && mouseX > 160) {
     stroke(ind);
-    strokeWeight(strk > 0 ? strk : 1);
+    strokeWeight(strk);
     line(pmouseX, pmouseY, mouseX, mouseY);
   }
 }
 
-void stamping() {
+// ----------------------------------------------------
+// Draw the left toolbar: buttons + sliders
+void drawToolbar() {
+  // draw toolbar background rectangle
+  noStroke();
+  fill(backgroundColor);
+  rect(0, 0, 150, height);
+  
+  // draw dividing lines
+  stroke(0);
+  line(150, 0, 150, height);
+  line(0, 150, 150, 150);
+  
+  // --- CIRCLE BUTTONS (Blue & Red) ---
+  // Blue circle at (40, 200), radius 25
+  fill(blueColor);
+  stroke(0);
+  ellipse(40, 200, 50, 50);
+  
+  // Red circle at (110, 200), radius 25
+  fill(redColor);
+  stroke(0);
+  ellipse(110, 200, 50, 50);
+  
+  // --- BLACK/WHITE RECTANGLE BUTTON ---
+  // Its fill is determined by `shade` (0..255). We draw a 50×50 box at (40, 280).
+  color bwColor = color(shade);
+  fill(bwColor);
+  stroke(0);
+  rect(40, 280, 50, 50);
+  
+  // --- SLIDERS ---
+  // 1) Stroke‐weight slider at x = sliderStrokeX
+  drawSlider(sliderStrokeX, 300, 300, sliderY1);
+  // 2) Shade slider at x = sliderShadeX
+  drawSlider(sliderShadeX, 300, 300, sliderY);
+}
+
+// generic function to draw a vertical slider “track + knob”
+void drawSlider(float x, float ytop, float length, float knobY) {
+  float ybot = ytop + length;
+  
+  // track
+  stroke(180);
+  strokeWeight(2);
+  line(x, ytop, x, ybot);
+  
+  // knob (circle of diameter 25). If mouse is over the knob, highlight it in white:
+  float d = dist(mouseX, mouseY, x, knobY);
+  if (d < 12.5) {
+    stroke(wt);
+  } else {
+    stroke(bk);
+  }
+  fill(bk);
+  circle(x, knobY, 25);
+}
+
+// ----------------------------------------------------
+// MOUSE PRESSED: check for ANY clickable item
+void mousePressed() {
+  // 1) Blue circle?
+  if (dist(mouseX, mouseY, 40, 200) < 25) {
+    playClick();
+    ind = blueColor;
+  }
+  
+  // 2) Red circle?
+  if (dist(mouseX, mouseY, 110, 200) < 25) {
+    playClick();
+    ind = redColor;
+  }
+  
+  // 3) Black/White rectangle at (40,280) size=50×50?
+  if (mouseX > 40 && mouseX < 90 && mouseY > 280 && mouseY < 330) {
+    playClick();
+    ind = color(shade);  // switch indicator to current shade
+  }
+  
+  // 4) “Stroke‐weight” slider knob?
+  if (dist(mouseX, mouseY, sliderStrokeX, sliderY1) < 12.5) {
+    playClick();
+    draggingStroke = true;
+  }
+  
+  // 5) “Shade” slider knob?
+  if (dist(mouseX, mouseY, sliderShadeX, sliderY) < 12.5) {
+    playClick();
+    draggingShade = true;
+  }
+}
+
+// MOUSE DRAGGED: update whichever slider is being dragged
+void mouseDragged() {
+  if (draggingShade) {
+    sliderY = constrain(mouseY, 300, 600);
+    // map vertical position (300..600) to shade (0..255)
+    shade = map(sliderY, 300, 600, 0, 255);
+  }
+  
+  if (draggingStroke) {
+    sliderY1 = constrain(mouseY, 300, 600);
+    // map vertical position (300..600) to stroke weight (1..20)
+    strk = map(sliderY1, 300, 600, 1, 20);
+  }
+}
+
+// MOUSE RELEASED: stop dragging sliders
+void mouseReleased() {
+  draggingShade  = false;
+  draggingStroke = false;
+}
+
+// play click sound exactly once per press
+void playClick() {
+  if (!clicksound.isPlaying()) {
+    clicksound.rewind();
+    clicksound.play();
+  }
 }
