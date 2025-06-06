@@ -4,6 +4,8 @@ import ddf.minim.*;
 PImage knife;
 Minim minim;
 AudioPlayer clicksound;
+
+//modes
 int mode;
 final int stamping = -1;
 final int drawing = 1;
@@ -11,7 +13,7 @@ final int drawing = 1;
 boolean draggingSliderShade = false;
 boolean draggingSliderStroke = false;
 
-//vars for slider
+//vars for slider(s)
 float strokeweight = 1;
 float sliderY1 = 500;
 float sliderX1 = 110;
@@ -39,19 +41,22 @@ void setup() {
   minim = new Minim(this);
   clicksound = minim.loadFile("clicksound.mp3", 512);
   knife = loadImage("knife.png");
+
+  //canvas
+  noStroke();
+  fill(wt);
+  rect(151, 0, 690, 800);
 }
 
 void draw() {
-  color shaded = color(shade);
-
-
-    if (mode == drawing) {
-      stroke(ind);
-      strokeWeight(strokeweight);
-      line(pmouseX, pmouseY, mouseX, mouseY);
-    } else if (mode == stamping) {
-      image(knife, mouseX, mouseY, 50, 50);
-    }
+  color shaded = color(shade); //cast :) to color from float to user in changing shade button
+  if (mode == drawing && mousePressed) {
+    stroke(ind);
+    strokeWeight(strokeweight);
+    line(pmouseX, pmouseY, mouseX, mouseY);
+  } else if (mode == stamping && mousePressed) {
+    image(knife, mouseX, mouseY, 50, 50);
+  }
 
   // toolbar
   stroke(0);
@@ -77,7 +82,16 @@ void draw() {
   drawslider(sliderX1, 500, 100, sliderY1);
 
   // Stamp button
-  drawStampButton(25, 625, 55, 55);
+  drawStampButton(47.5, 625, 55, 55);
+
+  //new button
+  drawNewButton(25, 685, 100, 30);
+
+  //save button
+  drawNewButton(25, 725, 100, 30);
+
+  //load button
+  drawLoadButton(25, 765, 100, 30);
 
   // Indicator
   fill(ind);
@@ -86,7 +100,61 @@ void draw() {
   ellipse(75, 75, 120, 120);
 }
 
-void drawStampButton(int rx, int ry, int w, int h) {
+void drawLoadButton(float rx, int ry, int w, int h) {
+  if (mouseX > rx && mouseX < rx + w && mouseY > ry && mouseY < ry + h && mousePressed) {
+    stroke(240);
+    selectInput("Pick a file to load :>", "load");
+    if (!clicksound.isPlaying()) {
+      clicksound.rewind();
+      clicksound.play();
+    }
+  } else {
+    stroke(0);
+  }
+  strokeWeight(0.75);
+  fill(wt);
+  rect(rx, ry, w, h);
+  fill(0);
+  text("Load", rx, ry);
+}
+
+void drawNewButton(float rx, int ry, int w, int h) {
+  if (mouseX > rx && mouseX < rx + w && mouseY > ry && mouseY < ry + h && mousePressed) {
+    stroke(240);
+    fill(wt);
+    rect(151, 0, 690, 800);
+    if (!clicksound.isPlaying()) {
+      clicksound.rewind();
+      clicksound.play();
+    }
+  } else {
+    stroke(0);
+  }
+  strokeWeight(0.75);
+  fill(wt);
+  rect(rx, ry, w, h);
+  stroke(0);
+  text("New", rx, ry);
+}
+
+void drawSaveButton(float rx, int ry, int w, int h) {
+  if (mouseX > rx && mouseX < rx + w && mouseY > ry && mouseY < ry + h && mousePressed) {
+    stroke(240);
+    selectOutput("Choose a name for your drawing <3", "saveImage");
+    if (!clicksound.isPlaying()) {
+      clicksound.rewind();
+      clicksound.play();
+    }
+  } else {
+    stroke(0);
+  }
+  strokeWeight(0.75);
+  fill(wt);
+  rect(rx, ry, w, h);
+  text("Save", rx, ry);
+}
+
+void drawStampButton(float rx, int ry, int w, int h) {
   if (mouseX > rx && mouseX < rx + w && mouseY > ry && mouseY < ry + h && mousePressed) {
     stroke(240);
     if (!clicksound.isPlaying()) {
@@ -98,7 +166,7 @@ void drawStampButton(int rx, int ry, int w, int h) {
     stroke(0);
   }
   strokeWeight(0.75);
-  fill(w);
+  fill(wt);
   rect(rx, ry, w, h);
   image(knife, rx + 3, ry + 3, 50, 50);
 }
@@ -146,6 +214,25 @@ void controlSlider() {
   }
 }
 
+void saveImage(File f) {
+  if (f!=null) {
+    PImage canvas = get(151, 0, 689, 800);
+    canvas.save(f.getAbsolutePath());
+  }
+}
+
+void load(File f){
+  if (f!=null){
+   int n=0;
+   while (n<10){
+     PImage pic = loadImage(f.getPath());
+     image(pic,0,0);
+     n=n+1;
+   }
+  }
+}
+
+//slider control
 void mousePressed() {
   if (dist(mouseX, mouseY, sliderX, sliderY) < 12.5) {
     if (!clicksound.isPlaying()) {
@@ -162,6 +249,7 @@ void mousePressed() {
   }
 }
 
+//slider control
 void mouseReleased() {
   draggingSliderShade = false;
   draggingSliderStroke = false;
