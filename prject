@@ -42,23 +42,24 @@ void setup() {
   clicksound = minim.loadFile("clicksound.mp3", 512);
   knife = loadImage("knife.png");
 
-  //canvas
+//default values for settings
   noStroke();
   fill(wt);
   rect(151, 0, 690, 800);
+  textAlign(CENTER, CENTER);
+  textSize(14);
 }
 
 void draw() {
-  color shaded = color(shade); //cast :) to color from float to user in changing shade button
-  if (mode == drawing && mousePressed) {
+  color shaded = color(shade);
+  if (mode == drawing && mousePressed && mouseX > 150) {
     stroke(ind);
     strokeWeight(strokeweight);
     line(pmouseX, pmouseY, mouseX, mouseY);
-  } else if (mode == stamping && mousePressed) {
+  } else if (mode == stamping && mousePressed && mouseX > 150) {
     image(knife, mouseX, mouseY, 50, 50);
   }
 
-  // toolbar
   stroke(0);
   strokeWeight(1);
   fill(background);
@@ -66,7 +67,7 @@ void draw() {
   line(150, 0, 150, 800);
   line(0, 150, 150, 150);
 
-  // Color Buttons
+//color buttons
   drawCircleButton(40, 200, 50, blue);
   drawCircleButton(110, 200, 50, red);
   drawCircleButton(40, 275, 50, green);
@@ -76,24 +77,24 @@ void draw() {
   drawCircleButton(40, 425, 50, purple);
   drawCircleButton(110, 425, 50, shaded);
 
-  // Sliders
+//Sliders
   strokeWeight(2);
   drawslider(sliderX, 500, 100, sliderY);
   drawslider(sliderX1, 500, 100, sliderY1);
 
-  // Stamp button
+//stamp button
   drawStampButton(47.5, 625, 55, 55);
 
-  //new button
+//new button
   drawNewButton(25, 685, 100, 30);
 
-  //save button
-  drawNewButton(25, 725, 100, 30);
+//save button
+  drawSaveButton(25, 725, 100, 30);
 
-  //load button
+//load button
   drawLoadButton(25, 765, 100, 30);
 
-  // Indicator
+//indicator
   fill(ind);
   stroke(0);
   strokeWeight(strokeweight);
@@ -101,21 +102,11 @@ void draw() {
 }
 
 void drawLoadButton(float rx, int ry, int w, int h) {
-  if (mouseX > rx && mouseX < rx + w && mouseY > ry && mouseY < ry + h && mousePressed) {
-    stroke(240);
-    selectInput("Pick a file to load :>", "load");
-    if (!clicksound.isPlaying()) {
-      clicksound.rewind();
-      clicksound.play();
-    }
-  } else {
-    stroke(0);
-  }
   strokeWeight(0.75);
   fill(wt);
   rect(rx, ry, w, h);
   fill(0);
-  text("Load", rx, ry);
+  text("Load", rx + w / 2, ry + h / 2);
 }
 
 void drawNewButton(float rx, int ry, int w, int h) {
@@ -134,24 +125,16 @@ void drawNewButton(float rx, int ry, int w, int h) {
   fill(wt);
   rect(rx, ry, w, h);
   stroke(0);
-  text("New", rx, ry);
+  fill(0);
+  text("New", rx + w / 2, ry + h / 2);
 }
 
 void drawSaveButton(float rx, int ry, int w, int h) {
-  if (mouseX > rx && mouseX < rx + w && mouseY > ry && mouseY < ry + h && mousePressed) {
-    stroke(240);
-    selectOutput("Choose a name for your drawing <3", "saveImage");
-    if (!clicksound.isPlaying()) {
-      clicksound.rewind();
-      clicksound.play();
-    }
-  } else {
-    stroke(0);
-  }
   strokeWeight(0.75);
   fill(wt);
   rect(rx, ry, w, h);
-  text("Save", rx, ry);
+  fill(0);
+  text("Save", rx + w / 2, ry + h / 2);
 }
 
 void drawStampButton(float rx, int ry, int w, int h) {
@@ -205,6 +188,7 @@ void drawslider(float x, float ytop, float length, float sliderY) {
 
 void controlSlider() {
   if (draggingSliderShade) {
+//stops the circle leaving the screen :>
     sliderY = constrain(mouseY, 500, 600);
     shade = map(sliderY, 500, 600, 0, 255);
   }
@@ -214,25 +198,6 @@ void controlSlider() {
   }
 }
 
-void saveImage(File f) {
-  if (f!=null) {
-    PImage canvas = get(151, 0, 689, 800);
-    canvas.save(f.getAbsolutePath());
-  }
-}
-
-void load(File f){
-  if (f!=null){
-   int n=0;
-   while (n<10){
-     PImage pic = loadImage(f.getPath());
-     image(pic,0,0);
-     n=n+1;
-   }
-  }
-}
-
-//slider control
 void mousePressed() {
   if (dist(mouseX, mouseY, sliderX, sliderY) < 12.5) {
     if (!clicksound.isPlaying()) {
@@ -249,12 +214,44 @@ void mousePressed() {
   }
 }
 
-//slider control
 void mouseReleased() {
+//when making these sliders i noticed you HAVE to be in the allocated space to drag it, this makes it so you can press and drag anywhere on the screen
   draggingSliderShade = false;
   draggingSliderStroke = false;
+
+//save button
+  if (mouseX > 25 && mouseX < 125 && mouseY > 725 && mouseY < 755) {
+    selectOutput("Choose a name for your drawing <3", "saveImage");
+    if (!clicksound.isPlaying()) {
+      clicksound.rewind();
+      clicksound.play();
+    }
+  }
+
+//load button
+  if (mouseX > 25 && mouseX < 125 && mouseY > 765 && mouseY < 795) {
+    selectInput("Pick a file to load :>", "load");
+    if (!clicksound.isPlaying()) {
+      clicksound.rewind();
+      clicksound.play();
+    }
+  }
 }
 
 void mouseDragged() {
   controlSlider();
+}
+
+void saveImage(File f) {
+  if (f != null) {
+    PImage canvas = get(151, 0, 689, 800);
+    canvas.save(f.getAbsolutePath());
+  }
+}
+
+void load(File f) {
+  if (f != null) {
+    PImage pic = loadImage(f.getPath());
+    image(pic, 151, 0);
+  }
 }
